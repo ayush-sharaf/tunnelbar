@@ -49,6 +49,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         updateStatusButton()
 
+        // Prompt when a connection's command needs a tool that isn't installed.
+        NotificationCenter.default.addObserver(
+            forName: .tmMissingTool, object: nil, queue: .main
+        ) { [weak self] note in
+            guard let tool = note.userInfo?["tool"] as? String else { return }
+            let connection = note.userInfo?["connection"] as? String ?? "this connection"
+            self?.showMissingToolAlert(tool: tool, connection: connection)
+        }
+
         // Show the manager window on launch so opening the app from Spotlight /
         // Finder / Dock reveals the UI (not just the status-bar icon).
         openManager()
@@ -284,6 +293,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
+    /// Tell the user a required command-line tool is missing and how to fix it.
+    private func showMissingToolAlert(tool: String, connection: String) {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "“\(tool)” isn’t installed"
+        alert.informativeText = """
+        Tunnelbar couldn’t find “\(tool)” on your PATH, so “\(connection)” can’t start.
+
+        Install it (for example with Homebrew: brew install \(tool)), make sure it’s on your PATH, then start the connection again.
+        """
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Open Homebrew")
+        if alert.runModal() == .alertSecondButtonReturn {
+            NSWorkspace.shared.open(URL(string: "https://brew.sh")!)
+        }
+    }
+
     @objc private func quit() {
         store.stopAll()
         NSApp.terminate(nil)
@@ -292,6 +321,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
 extension Notification.Name {
     static let tmAddConnection = Notification.Name("tmAddConnection")
+    static let tmMissingTool = Notification.Name("tmMissingTool")
 }
 
 /// Bridges the AppKit-owned selection box into SwiftUI.

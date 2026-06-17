@@ -32,6 +32,7 @@ final class Tunnel: ObservableObject, Identifiable {
     private let maxReconnectAttempts = 5
     private var reconnecting = false
     private var reconnectWorkItem: DispatchWorkItem?
+    private var didPromptMissingTool = false
 
     init(config: ConnectionConfig, logsDir: URL, registry: ProcessRegistry) {
         self.config = config
@@ -56,7 +57,10 @@ final class Tunnel: ObservableObject, Identifiable {
         reconnectWorkItem?.cancel()
         reconnectWorkItem = nil
         intentionalStop = false
-        if !reconnecting { reconnectAttempts = 0 }
+        if !reconnecting {
+            reconnectAttempts = 0
+            didPromptMissingTool = false
+        }
         reconnecting = false
         setStatus(.starting)
         appendSystem("$ \(command)")
@@ -103,8 +107,16 @@ final class Tunnel: ObservableObject, Identifiable {
                 } else {
                     let code = p.terminationStatus
                     self.appendSystem("Process exited (code \(code)).")
-                    self.setStatus(code == 0 ? .stopped : .failed("exited with code \(code)"))
-                    self.handleUnexpectedExit()
+                    // Exit 127 = "command not found": a required tool isn't
+                    // installed / on PATH. Surface it by name and don't bother
+                    // auto-reconnecting (it would just fail again).
+                    if code == 127, let tool = self.detectMissingTool() {
+                        self.setStatus(.failed("‘\(tool)’ not found"))
+                        self.promptMissingTool(tool)
+                    } else {
+                        self.setStatus(code == 0 ? .stopped : .failed("exited with code \(code)"))
+                        self.handleUnexpectedExit()
+                    }
                 }
             }
         }
@@ -146,6 +158,27 @@ final class Tunnel: ObservableObject, Identifiable {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.start()
         }
+    }
+
+    /// Scan recent log lines for a shell "command not found" message and return
+    /// the missing program name, if any.
+    private func detectMissingTool() -> String? {
+        for line in logs.reversed().prefix(25) {
+            if let tool = CommandParser.parseMissingCommand(line.text) { return tool }
+        }
+        return nil
+    }
+
+    /// Tell the app to prompt the user about a missing tool — once per failure
+    /// run, so retries/reconnects don't spam alerts.
+    private func promptMissingTool(_ tool: String) {
+        guard !didPromptMissingTool else { return }
+        didPromptMissingTool = true
+        NotificationCenter.default.post(
+            name: .tmMissingTool,
+            object: nil,
+            userInfo: ["tool": tool, "connection": config.name]
+        )
     }
 
     /// Called on the main thread when a *running* connection exits without a
