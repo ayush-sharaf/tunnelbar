@@ -75,6 +75,26 @@ enum CommandParser {
         return ""
     }
 
+    /// Extract the missing program name from a shell "command not found" line,
+    /// across zsh/bash/sh phrasings. Returns nil if the line isn't one.
+    ///
+    ///   zsh:  "zsh:1: command not found: cloudflared"
+    ///   bash: "bash: line 1: cloudflared: command not found"
+    static func parseMissingCommand(_ line: String) -> String? {
+        if let r = line.range(of: "command not found: ") {
+            let rest = line[r.upperBound...].trimmingCharacters(in: .whitespaces)
+            let name = rest.split(separator: " ").first.map(String.init) ?? rest
+            return name.isEmpty ? nil : name
+        }
+        if let r = line.range(of: ": command not found") {
+            let left = String(line[..<r.lowerBound])
+            let name = left.split(separator: ":").last
+                .map { $0.trimmingCharacters(in: .whitespaces) } ?? ""
+            return name.isEmpty ? nil : name
+        }
+        return nil
+    }
+
     static func nameFromHostname(_ hostname: String) -> String {
         if hostname.contains("/"), let last = hostname.split(separator: "/").last {
             return String(last)

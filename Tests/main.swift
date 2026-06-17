@@ -83,6 +83,19 @@ eq(TunnelStatus.running.dot, "🟢", "status: running dot")
 eq(TunnelStatus.stopped.dot, "⚪️", "status: stopped dot")
 eq(TunnelStatus.failed("x").dot, "🔴", "status: failed dot")
 
+// MARK: - CommandParser.parseMissingCommand
+
+eq(CommandParser.parseMissingCommand("zsh:1: command not found: cloudflared"),
+   "cloudflared", "missing: zsh phrasing")
+eq(CommandParser.parseMissingCommand("zsh: command not found: ngrok"),
+   "ngrok", "missing: zsh no line number")
+eq(CommandParser.parseMissingCommand("bash: line 1: cloudflared: command not found"),
+   "cloudflared", "missing: bash phrasing")
+eq(CommandParser.parseMissingCommand("bore: command not found"),
+   "bore", "missing: bare name phrasing")
+check(CommandParser.parseMissingCommand("cloudflared starting tunnel…") == nil,
+   "missing: normal log line is not a match")
+
 // MARK: - UpdateChecker
 
 eq(UpdateChecker.normalize("v1.3"), "1.3", "normalize: strips leading v")
