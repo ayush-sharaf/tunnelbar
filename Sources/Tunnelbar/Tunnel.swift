@@ -18,9 +18,27 @@ final class Tunnel: ObservableObject, Identifiable {
     private var intentionalStop = false
     private let maxLines = 5000
 
+    // Log file rotation: cap the on-disk log and keep one rotated backup so it
+    // can't grow without bound.
+    private let maxLogBytes = 1_000_000
+    private var logBytes = 0
+    private var rotatedLogURL: URL { logFileURL.appendingPathExtension("1") }
+
+    // Auto-reconnect bookkeeping (only used when the setting is enabled and a
+    // running connection drops unexpectedly — never after a manual stop).
+    private var startedAt: Date?
+    private var reconnectAttempts = 0
+    private let maxReconnectAttempts = 5
+    private var reconnecting = false
+    private var reconnectWorkItem: DispatchWorkItem?
+
     init(config: ConnectionConfig, logsDir: URL) {
         self.config = config
         self.logFileURL = logsDir.appendingPathComponent("\(config.id.uuidString).log")
+        if let attrs = try? FileManager.default.attributesOfItem(atPath: logFileURL.path),
+           let size = attrs[.size] as? Int {
+            logBytes = size
+        }
     }
 
     // MARK: - Lifecycle
@@ -33,7 +51,11 @@ final class Tunnel: ObservableObject, Identifiable {
             return
         }
 
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
         intentionalStop = false
+        if !reconnecting { reconnectAttempts = 0 }
+        reconnecting = false
         setStatus(.starting)
         appendSystem("$ \(command)")
 
@@ -79,6 +101,7 @@ final class Tunnel: ObservableObject, Identifiable {
                     let code = p.terminationStatus
                     self.appendSystem("Process exited (code \(code)).")
                     self.setStatus(code == 0 ? .stopped : .failed("exited with code \(code)"))
+                    self.handleUnexpectedExit()
                 }
             }
         }
@@ -86,6 +109,7 @@ final class Tunnel: ObservableObject, Identifiable {
         do {
             try proc.run()
             process = proc
+            startedAt = Date()
             setStatus(.running)
         } catch {
             appendSystem("Failed to launch: \(error.localizedDescription)")
@@ -94,6 +118,12 @@ final class Tunnel: ObservableObject, Identifiable {
     }
 
     func stop() {
+        // Cancel any pending auto-reconnect so a manual stop always wins.
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
+        reconnectAttempts = 0
+        reconnecting = false
+
         guard let proc = process, proc.isRunning else {
             setStatus(.stopped)
             return
@@ -115,9 +145,37 @@ final class Tunnel: ObservableObject, Identifiable {
         }
     }
 
+    /// Called on the main thread when a *running* connection exits without a
+    /// manual stop. Reconnects only if the user enabled auto-reconnect, with a
+    /// capped number of attempts and a backoff to avoid crash loops.
+    private func handleUnexpectedExit() {
+        guard AppSettings.shared.autoReconnect else { return }
+
+        // A connection that stayed up for a while is treated as a fresh drop.
+        if let startedAt, Date().timeIntervalSince(startedAt) >= 10 {
+            reconnectAttempts = 0
+        }
+        reconnectAttempts += 1
+
+        guard reconnectAttempts <= maxReconnectAttempts else {
+            appendSystem("Auto-reconnect gave up after \(maxReconnectAttempts) attempts.")
+            reconnecting = false
+            return
+        }
+
+        let delay = Double(min(30, 3 * reconnectAttempts))
+        appendSystem("Auto-reconnecting (attempt \(reconnectAttempts)/\(maxReconnectAttempts)) in \(Int(delay))s…")
+        reconnecting = true
+        let item = DispatchWorkItem { [weak self] in self?.start() }
+        reconnectWorkItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: item)
+    }
+
     func clearLogs() {
         logs.removeAll()
         try? "".write(to: logFileURL, atomically: true, encoding: .utf8)
+        try? FileManager.default.removeItem(at: rotatedLogURL)
+        logBytes = 0
     }
 
     // MARK: - Log handling
@@ -162,6 +220,16 @@ final class Tunnel: ObservableObject, Identifiable {
         } else {
             try? data.write(to: logFileURL)
         }
+        logBytes += data.count
+        if logBytes > maxLogBytes { rotateLogFile() }
+    }
+
+    /// Roll the log over when it gets large: keep one backup (`<id>.log.1`).
+    private func rotateLogFile() {
+        let fm = FileManager.default
+        try? fm.removeItem(at: rotatedLogURL)
+        try? fm.moveItem(at: logFileURL, to: rotatedLogURL)
+        logBytes = 0
     }
 
     private func setStatus(_ s: TunnelStatus) {

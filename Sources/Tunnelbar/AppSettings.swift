@@ -41,6 +41,13 @@ final class AppSettings: ObservableObject {
         didSet { updateLoginItem(launchAtLogin) }
     }
 
+    /// When enabled, a connection that was running and drops unexpectedly is
+    /// automatically restarted (never after a manual stop).
+    @Published var autoReconnect: Bool {
+        didSet { UserDefaults.standard.set(autoReconnect, forKey: autoReconnectKey) }
+    }
+    private let autoReconnectKey = "autoReconnect"
+
     var version: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—" }
     var build: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—" }
 
@@ -48,6 +55,7 @@ final class AppSettings: ObservableObject {
         let raw = UserDefaults.standard.string(forKey: themeKey) ?? AppTheme.system.rawValue
         theme = AppTheme(rawValue: raw) ?? .system
         launchAtLogin = (SMAppService.mainApp.status == .enabled)
+        autoReconnect = UserDefaults.standard.bool(forKey: autoReconnectKey)
     }
 
     /// Apply the chosen appearance to the whole app.

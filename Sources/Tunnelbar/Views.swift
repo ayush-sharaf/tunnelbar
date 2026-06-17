@@ -101,6 +101,7 @@ struct TunnelRow: View {
     var isSelected: Bool
     var onDelete: () -> Void
     @State private var hovering = false
+    @State private var confirmingDelete = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -119,7 +120,7 @@ struct TunnelRow: View {
             }
             Spacer(minLength: 4)
             Button(role: .destructive) {
-                onDelete()
+                confirmingDelete = true
             } label: {
                 Image(systemName: "trash")
                     .foregroundStyle(hovering ? Color.red : Color.secondary)
@@ -127,6 +128,16 @@ struct TunnelRow: View {
             .buttonStyle(.borderless)
             .help("Delete connection")
             .opacity(hovering ? 1 : 0.55)
+            .confirmationDialog(
+                "Delete “\(tunnel.config.name)”?",
+                isPresented: $confirmingDelete,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) { onDelete() }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This removes the connection and stops it if running. This can't be undone.")
+            }
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 7)
