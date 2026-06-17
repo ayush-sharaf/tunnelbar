@@ -12,6 +12,7 @@ final class Tunnel: ObservableObject, Identifiable {
     var id: UUID { config.id }
 
     private let logFileURL: URL
+    private let registry: ProcessRegistry
     private var process: Process?
     private var outBuffer = ""
     private var errBuffer = ""
@@ -32,8 +33,9 @@ final class Tunnel: ObservableObject, Identifiable {
     private var reconnecting = false
     private var reconnectWorkItem: DispatchWorkItem?
 
-    init(config: ConnectionConfig, logsDir: URL) {
+    init(config: ConnectionConfig, logsDir: URL, registry: ProcessRegistry) {
         self.config = config
+        self.registry = registry
         self.logFileURL = logsDir.appendingPathComponent("\(config.id.uuidString).log")
         if let attrs = try? FileManager.default.attributesOfItem(atPath: logFileURL.path),
            let size = attrs[.size] as? Int {
@@ -94,6 +96,7 @@ final class Tunnel: ObservableObject, Identifiable {
                 outPipe.fileHandleForReading.readabilityHandler = nil
                 errPipe.fileHandleForReading.readabilityHandler = nil
                 self.process = nil
+                self.registry.unregister(id: self.id)
                 if self.intentionalStop {
                     self.appendSystem("Stopped.")
                     self.setStatus(.stopped)
@@ -110,6 +113,7 @@ final class Tunnel: ObservableObject, Identifiable {
             try proc.run()
             process = proc
             startedAt = Date()
+            registry.register(id: id, pid: proc.processIdentifier, command: command)
             setStatus(.running)
         } catch {
             appendSystem("Failed to launch: \(error.localizedDescription)")
@@ -131,10 +135,9 @@ final class Tunnel: ObservableObject, Identifiable {
         intentionalStop = true
         setStatus(.stopping)
         appendSystem("Stopping…")
-        // Terminate the whole process group so child processes (e.g. node
-        // spawned by npm) also exit.
-        let pid = proc.processIdentifier
-        kill(-pid, SIGTERM)
+        // Terminate the process and its descendants (e.g. node spawned by npm),
+        // which don't reliably share a killable process group.
+        ProcessRegistry.terminateTree(proc.processIdentifier)
         proc.terminate()
     }
 

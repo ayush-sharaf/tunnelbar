@@ -12,6 +12,8 @@ terminal windows.
 ![language: Swift](https://img.shields.io/badge/Swift-6-orange)
 ![license: MIT](https://img.shields.io/badge/license-MIT-green)
 
+![Tunnelbar manager window](docs/screenshot.png)
+
 ## Features
 
 - **Menu-bar icon** — every connection shows a live status dot (🟢 running /
@@ -81,6 +83,16 @@ To produce shareable artifacts (DMG + zip in `dist/`):
 - macOS 14 (Sonoma) or later, Apple Silicon.
 - The CLI tools your commands use (`cloudflared`, `node`/`npm`, …) installed and
   on your `PATH`.
+
+## Security & privacy
+
+Your connection commands and their captured logs are stored **unencrypted** on
+disk under `~/Library/Application Support/Tunnelbar/` (a per-user directory).
+This is fine for typical tunnel/start commands, but **avoid putting secrets or
+tokens directly in a command string** — prefer environment variables, a
+keychain helper, or a credentials file referenced by the command, so the secret
+isn't written to `connections.json` or the log files. Nothing leaves your
+machine; Tunnelbar only spawns the commands you give it.
 
 ## Project layout
 
