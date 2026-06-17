@@ -47,6 +47,12 @@ final class TunnelStore: ObservableObject {
         save()
     }
 
+    /// Reorder connections (drag-and-drop in the list). Order is persisted.
+    func move(from source: IndexSet, to destination: Int) {
+        tunnels.move(fromOffsets: source, toOffset: destination)
+        save()
+    }
+
     func tunnel(_ id: UUID) -> Tunnel? {
         tunnels.first { $0.id == id }
     }

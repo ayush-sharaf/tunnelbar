@@ -11,35 +11,41 @@ struct ManagerView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selection) {
-                ForEach(store.tunnels) { tunnel in
-                    TunnelRow(tunnel: tunnel)
-                        .tag(tunnel.id)
-                        .contextMenu {
-                            Button("Edit…") { editing = tunnel.config }
-                            Button("Delete", role: .destructive) { store.remove(tunnel) }
-                        }
+            VStack(spacing: 0) {
+                List(selection: $selection) {
+                    ForEach(store.tunnels) { tunnel in
+                        TunnelRow(tunnel: tunnel) { store.remove(tunnel) }
+                            .tag(tunnel.id)
+                            .contextMenu {
+                                Button("Edit…") { editing = tunnel.config }
+                                Button("Delete", role: .destructive) { store.remove(tunnel) }
+                            }
+                    }
+                    .onMove { store.move(from: $0, to: $1) }
                 }
+                .overlay {
+                    if store.tunnels.isEmpty {
+                        ContentUnavailableView(
+                            "No Connections",
+                            systemImage: "point.3.connected.trianglepath.dotted",
+                            description: Text("Use the + strip below to add a command.")
+                        )
+                    }
+                }
+
+                Divider()
+                addStrip
             }
             .frame(minWidth: 240)
             .navigationTitle("Tunnels")
             .toolbar {
                 ToolbarItem {
                     Button {
-                        showingAdd = true
+                        AppDelegate.openSettings()
                     } label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "gearshape")
                     }
-                    .help("Add a connection")
-                }
-            }
-            .overlay {
-                if store.tunnels.isEmpty {
-                    ContentUnavailableView(
-                        "No Connections",
-                        systemImage: "point.3.connected.trianglepath.dotted",
-                        description: Text("Click + to add a command to run.")
-                    )
+                    .help("Settings")
                 }
             }
         } detail: {
@@ -64,10 +70,31 @@ struct ManagerView: View {
             showingAdd = true
         }
     }
+
+    /// Full-width strip at the bottom of the list to add a connection.
+    private var addStrip: some View {
+        Button {
+            showingAdd = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "plus")
+                Text("Add Connection")
+            }
+            .font(.callout)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.secondary)
+        .help("Add a connection")
+    }
 }
 
 struct TunnelRow: View {
     @ObservedObject var tunnel: Tunnel
+    var onDelete: () -> Void
+    @State private var hovering = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -85,8 +112,18 @@ struct TunnelRow: View {
                     .truncationMode(.middle)
             }
             Spacer()
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Image(systemName: "trash")
+                    .foregroundStyle(hovering ? Color.red : Color.secondary)
+            }
+            .buttonStyle(.borderless)
+            .help("Delete connection")
+            .opacity(hovering ? 1 : 0.55)
         }
         .padding(.vertical, 2)
+        .onHover { hovering = $0 }
     }
 
     private var color: Color {

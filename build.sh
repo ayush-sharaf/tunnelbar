@@ -26,6 +26,11 @@ cp "build/${APP_NAME}" "${BUNDLE}/Contents/MacOS/${APP_NAME}"
 cp Info.plist "${BUNDLE}/Contents/Info.plist"
 printf 'APPL????' > "${BUNDLE}/Contents/PkgInfo"
 
+# App icon (generate once with: swift scripts/generate-icon.swift)
+if [ -f Resources/AppIcon.icns ]; then
+  cp Resources/AppIcon.icns "${BUNDLE}/Contents/Resources/AppIcon.icns"
+fi
+
 # Ad-hoc code signature so macOS will run it locally.
 codesign --force --deep --sign - "${BUNDLE}" 2>/dev/null || true
 
