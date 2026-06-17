@@ -24,6 +24,10 @@ terminal windows.
   view** per connection. **⌘-click** URLs or file paths in the logs to open
   them (like Terminal.app).
 - **Manual control** — connections start/stop only when you tell them to.
+- **Reorderable list** — drag connections to reorder; delete inline with the
+  trash button or add via the strip at the bottom of the list.
+- **Settings** — light / dark / system theme, open-at-login toggle, and version
+  info (⌘, or the gear button).
 - **Persistent** — connections are saved to
   `~/Library/Application Support/Tunnelbar/connections.json`; per-connection
   logs go to `…/Tunnelbar/logs/<id>.log`.

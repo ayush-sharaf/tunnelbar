@@ -10,3 +10,6 @@ dist/
 # Swift Package Manager
 .swiftpm/
 Package.resolved
+
+# Local release helper (kept out of version control)
+release.sh

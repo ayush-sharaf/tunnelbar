@@ -11,35 +11,46 @@ struct ManagerView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selection) {
-                ForEach(store.tunnels) { tunnel in
-                    TunnelRow(tunnel: tunnel)
-                        .tag(tunnel.id)
-                        .contextMenu {
-                            Button("Edit…") { editing = tunnel.config }
-                            Button("Delete", role: .destructive) { store.remove(tunnel) }
-                        }
+            VStack(spacing: 0) {
+                List(selection: $selection) {
+                    ForEach(store.tunnels) { tunnel in
+                        TunnelRow(tunnel: tunnel,
+                                  isSelected: selection == tunnel.id) { store.remove(tunnel) }
+                            .tag(tunnel.id)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                            .contextMenu {
+                                Button("Edit…") { editing = tunnel.config }
+                                Button("Delete", role: .destructive) { store.remove(tunnel) }
+                            }
+                    }
+                    .onMove { store.move(from: $0, to: $1) }
                 }
+                .listStyle(.plain)
+                .overlay {
+                    if store.tunnels.isEmpty {
+                        ContentUnavailableView(
+                            "No Connections",
+                            systemImage: "point.3.connected.trianglepath.dotted",
+                            description: Text("Use the + strip below to add a command.")
+                        )
+                    }
+                }
+
+                Divider()
+                addStrip
             }
             .frame(minWidth: 240)
             .navigationTitle("Tunnels")
             .toolbar {
                 ToolbarItem {
                     Button {
-                        showingAdd = true
+                        AppDelegate.openSettings()
                     } label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "gearshape")
                     }
-                    .help("Add a connection")
-                }
-            }
-            .overlay {
-                if store.tunnels.isEmpty {
-                    ContentUnavailableView(
-                        "No Connections",
-                        systemImage: "point.3.connected.trianglepath.dotted",
-                        description: Text("Click + to add a command to run.")
-                    )
+                    .help("Settings")
                 }
             }
         } detail: {
@@ -64,10 +75,32 @@ struct ManagerView: View {
             showingAdd = true
         }
     }
+
+    /// Full-width strip at the bottom of the list to add a connection.
+    private var addStrip: some View {
+        Button {
+            showingAdd = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "plus")
+                Text("Add Connection")
+            }
+            .font(.callout)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.secondary)
+        .help("Add a connection")
+    }
 }
 
 struct TunnelRow: View {
     @ObservedObject var tunnel: Tunnel
+    var isSelected: Bool
+    var onDelete: () -> Void
+    @State private var hovering = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -84,9 +117,41 @@ struct TunnelRow: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
-            Spacer()
+            Spacer(minLength: 4)
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Image(systemName: "trash")
+                    .foregroundStyle(hovering ? Color.red : Color.secondary)
+            }
+            .buttonStyle(.borderless)
+            .help("Delete connection")
+            .opacity(hovering ? 1 : 0.55)
         }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // Solid background so the whole row (not just the text) is the drag
+        // image while reordering, and so selection/hover are clearly visible.
+        .background(
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(rowBackground)
+        )
+        .padding(.horizontal, 6)
         .padding(.vertical, 2)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+    }
+
+    private var rowBackground: Color {
+        let base = NSColor.controlBackgroundColor
+        if isSelected {
+            return Color(nsColor: NSColor.controlAccentColor.blended(withFraction: 0.7, of: base) ?? base)
+        }
+        if hovering {
+            return Color(nsColor: NSColor.controlColor.blended(withFraction: 0.5, of: base) ?? base)
+        }
+        return Color(nsColor: base)
     }
 
     private var color: Color {

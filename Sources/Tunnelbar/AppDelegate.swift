@@ -3,9 +3,12 @@ import SwiftUI
 import Combine
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    private(set) static weak var shared: AppDelegate?
+
     private let store = TunnelStore.shared
     private var statusItem: NSStatusItem!
     private var managerWindow: NSWindow?
+    private var settingsWindow: NSWindow?
     private var selection = Selection()
     private var cancellable: AnyCancellable?
 
@@ -14,7 +17,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         @Published var id: UUID?
     }
 
+    /// Convenience for SwiftUI views to open the Settings window.
+    static func openSettings() {
+        shared?.showSettings()
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
+        AppSettings.shared.applyTheme()
         setupMainMenu()
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -60,6 +70,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let appItem = NSMenuItem()
         mainMenu.addItem(appItem)
         let appMenu = NSMenu()
+        let settingsItem = appMenu.addItem(withTitle: "Settings…",
+                                           action: #selector(showSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Hide", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(.separator())
         let quitItem = appMenu.addItem(withTitle: "Quit Tunnelbar",
@@ -119,6 +133,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(.separator())
         addItem(to: menu, title: "Open Manager…", key: "o", action: #selector(openManager))
         addItem(to: menu, title: "Add Connection…", key: "n", action: #selector(addConnection))
+        addItem(to: menu, title: "Settings…", key: ",", action: #selector(showSettings))
         menu.addItem(.separator())
         addItem(to: menu, title: "Quit Tunnelbar", key: "q", action: #selector(quit))
     }
@@ -199,6 +214,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         managerWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    @objc private func showSettings() {
+        if settingsWindow == nil {
+            let hosting = NSHostingController(rootView: SettingsView())
+            let window = NSWindow(contentViewController: hosting)
+            window.title = "Settings"
+            window.styleMask = [.titled, .closable]
+            window.isReleasedWhenClosed = false
+            settingsWindow = window
+        }
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        settingsWindow?.center()
+        settingsWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func quit() {
