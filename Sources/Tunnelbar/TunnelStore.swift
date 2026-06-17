@@ -10,6 +10,7 @@ final class TunnelStore: ObservableObject {
     private let supportDir: URL
     private let configURL: URL
     private let logsDir: URL
+    private let registry: ProcessRegistry
     private var cancellables: [UUID: AnyCancellable] = [:]
 
     private init() {
@@ -18,8 +19,11 @@ final class TunnelStore: ObservableObject {
         supportDir = base.appendingPathComponent("Tunnelbar", isDirectory: true)
         logsDir = supportDir.appendingPathComponent("logs", isDirectory: true)
         configURL = supportDir.appendingPathComponent("connections.json")
+        registry = ProcessRegistry(fileURL: supportDir.appendingPathComponent("running.json"))
         try? fm.createDirectory(at: logsDir, withIntermediateDirectories: true)
 
+        // Clean up processes left running by a previous session (force-quit/crash).
+        registry.reapOrphans()
         load()
     }
 
@@ -92,7 +96,7 @@ final class TunnelStore: ObservableObject {
     // MARK: - Persistence
 
     private func makeTunnel(_ config: ConnectionConfig) -> Tunnel {
-        let tunnel = Tunnel(config: config, logsDir: logsDir)
+        let tunnel = Tunnel(config: config, logsDir: logsDir, registry: registry)
         // Re-publish child object changes so list views and the menu refresh.
         cancellables[config.id] = tunnel.objectWillChange.sink { [weak self] _ in
             DispatchQueue.main.async { self?.objectWillChange.send() }
