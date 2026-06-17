@@ -44,6 +44,11 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section("Updates") {
+                Toggle("Check for updates on launch", isOn: $settings.checkForUpdatesOnLaunch)
+                Button("Check Now") { AppDelegate.checkForUpdates() }
+            }
+
             Section("About") {
                 LabeledContent("Application", value: "Tunnelbar")
                 LabeledContent("Version", value: "\(settings.version) (\(settings.build))")
@@ -54,7 +59,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 440, height: 420)
+        .frame(width: 440, height: 500)
     }
 
     private func exportConnections() {

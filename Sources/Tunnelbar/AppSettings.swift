@@ -48,6 +48,12 @@ final class AppSettings: ObservableObject {
     }
     private let autoReconnectKey = "autoReconnect"
 
+    /// Whether to silently check GitHub for a newer release on launch.
+    @Published var checkForUpdatesOnLaunch: Bool {
+        didSet { UserDefaults.standard.set(checkForUpdatesOnLaunch, forKey: checkUpdatesKey) }
+    }
+    private let checkUpdatesKey = "checkForUpdatesOnLaunch"
+
     var version: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—" }
     var build: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—" }
 
@@ -56,6 +62,7 @@ final class AppSettings: ObservableObject {
         theme = AppTheme(rawValue: raw) ?? .system
         launchAtLogin = (SMAppService.mainApp.status == .enabled)
         autoReconnect = UserDefaults.standard.bool(forKey: autoReconnectKey)
+        checkForUpdatesOnLaunch = UserDefaults.standard.bool(forKey: checkUpdatesKey)
     }
 
     /// Apply the chosen appearance to the whole app.

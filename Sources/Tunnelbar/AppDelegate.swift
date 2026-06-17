@@ -22,6 +22,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         shared?.showSettings()
     }
 
+    /// Convenience for SwiftUI views to trigger a manual update check.
+    static func checkForUpdates() {
+        shared?.checkForUpdates()
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
         AppSettings.shared.applyTheme()
@@ -47,6 +52,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Show the manager window on launch so opening the app from Spotlight /
         // Finder / Dock reveals the UI (not just the status-bar icon).
         openManager()
+
+        // Opt-in: quietly check for a newer release on launch.
+        if AppSettings.shared.checkForUpdatesOnLaunch {
+            UpdateChecker.check { [weak self] outcome in
+                self?.showUpdateResult(outcome, silent: true)
+            }
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -73,6 +85,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let settingsItem = appMenu.addItem(withTitle: "Settings…",
                                            action: #selector(showSettings), keyEquivalent: ",")
         settingsItem.target = self
+        let updatesItem = appMenu.addItem(withTitle: "Check for Updates…",
+                                          action: #selector(checkForUpdates), keyEquivalent: "")
+        updatesItem.target = self
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Hide", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(.separator())
@@ -134,6 +149,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         addItem(to: menu, title: "Open Manager…", key: "o", action: #selector(openManager))
         addItem(to: menu, title: "Add Connection…", key: "n", action: #selector(addConnection))
         addItem(to: menu, title: "Settings…", key: ",", action: #selector(showSettings))
+        addItem(to: menu, title: "Check for Updates…", key: "", action: #selector(checkForUpdates))
         menu.addItem(.separator())
         addItem(to: menu, title: "Quit Tunnelbar", key: "q", action: #selector(quit))
     }
@@ -229,6 +245,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.center()
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    @objc private func checkForUpdates() {
+        UpdateChecker.check { [weak self] outcome in
+            self?.showUpdateResult(outcome, silent: false)
+        }
+    }
+
+    /// Present the update result. When `silent` (launch auto-check), only an
+    /// available update surfaces an alert; "up to date" and errors stay quiet.
+    private func showUpdateResult(_ outcome: UpdateChecker.Outcome, silent: Bool) {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+
+        let alert = NSAlert()
+        switch outcome {
+        case .updateAvailable(let release):
+            alert.messageText = "Update available"
+            alert.informativeText = "Tunnelbar \(release.version) is available. You're on \(UpdateChecker.currentVersion)."
+            alert.addButton(withTitle: "Open Release")
+            alert.addButton(withTitle: "Later")
+            if alert.runModal() == .alertFirstButtonReturn {
+                NSWorkspace.shared.open(release.url)
+            }
+        case .upToDate(let current):
+            if silent { return }
+            alert.messageText = "You're up to date"
+            alert.informativeText = "Tunnelbar \(current) is the latest version."
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        case .failed(let message):
+            if silent { return }
+            alert.messageText = "Couldn't check for updates"
+            alert.informativeText = message
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
     }
 
     @objc private func quit() {

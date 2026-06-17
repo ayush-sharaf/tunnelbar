@@ -83,6 +83,17 @@ eq(TunnelStatus.running.dot, "🟢", "status: running dot")
 eq(TunnelStatus.stopped.dot, "⚪️", "status: stopped dot")
 eq(TunnelStatus.failed("x").dot, "🔴", "status: failed dot")
 
+// MARK: - UpdateChecker
+
+eq(UpdateChecker.normalize("v1.3"), "1.3", "normalize: strips leading v")
+eq(UpdateChecker.normalize("1.3"), "1.3", "normalize: no-op without v")
+check(UpdateChecker.compare("1.3", "1.2") == .orderedDescending, "compare: 1.3 > 1.2")
+check(UpdateChecker.compare("1.2", "1.3") == .orderedAscending, "compare: 1.2 < 1.3")
+check(UpdateChecker.compare("1.2", "1.2") == .orderedSame, "compare: equal")
+check(UpdateChecker.compare("1.10", "1.9") == .orderedDescending, "compare: 1.10 > 1.9 (numeric)")
+check(UpdateChecker.compare("2.0", "1.9") == .orderedDescending, "compare: major wins")
+check(UpdateChecker.compare("1.2.1", "1.2") == .orderedDescending, "compare: extra patch component")
+
 // MARK: - Summary
 
 print("\(passes) passed, \(failures) failed")
