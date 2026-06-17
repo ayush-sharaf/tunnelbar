@@ -1,7 +1,9 @@
 name: Release
 
 # Build Tunnelbar and publish a GitHub Release either when a v* tag is pushed,
-# or manually from the Actions tab ("Run workflow").
+# or manually from the Actions tab ("Run workflow"). After releasing, the
+# version in Info.plist is bumped to match via an auto-merged PR (main is
+# protected, so the bump goes through a pull request).
 on:
   push:
     tags:
@@ -15,13 +17,16 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   build-and-release:
     runs-on: macos-14
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Determine version and tag
         id: ver
@@ -60,3 +65,39 @@ jobs:
             dist/Tunnelbar-*.zip
           generate_release_notes: true
           fail_on_unmatched_files: true
+
+  # Bump Info.plist on main to the released version, via an auto-merged PR
+  # (direct pushes to main are blocked by branch protection).
+  bump-version:
+    needs: build-and-release
+    runs-on: macos-14
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Bump version and open auto-merged PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.build-and-release.outputs.version }}
+        run: |
+          set -euo pipefail
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${VERSION}" Info.plist
+
+          if git diff --quiet -- Info.plist; then
+            echo "Info.plist already at ${VERSION}; nothing to bump."
+            exit 0
+          fi
+
+          BRANCH="chore/bump-v${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${BRANCH}"
+          git commit -am "chore: bump version to ${VERSION}"
+          git push -u origin "${BRANCH}"
+          gh pr create --base main --head "${BRANCH}" \
+            --title "chore: bump version to ${VERSION}" \
+            --body "Automated version bump after releasing v${VERSION}."
+          gh pr merge "${BRANCH}" --squash --delete-branch
