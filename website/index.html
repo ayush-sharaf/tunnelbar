@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tunnelbar — cloudflared tunnels in your macOS menu bar</title>
+  <meta name="description" content="A native macOS menu-bar app to manage cloudflared tunnels and local services. Install with one command." />
+  <link rel="icon" href="icon.png" />
+  <meta property="og:title" content="Tunnelbar" />
+  <meta property="og:description" content="Manage cloudflared tunnels and local services from the macOS menu bar." />
+  <meta property="og:image" content="screenshot.png" />
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --bg-soft: #121826;
+      --card: #161d2d;
+      --border: #243049;
+      --text: #e7ecf5;
+      --muted: #97a3bd;
+      --accent: #3b82f6;
+      --accent-2: #1d4ed8;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+      background: radial-gradient(1200px 700px at 50% -200px, #15233f 0%, var(--bg) 60%);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
+    .brand img { width: 28px; height: 28px; border-radius: 7px; }
+    .nav-links a { color: var(--muted); margin-left: 22px; font-size: 15px; }
+    .nav-links a:hover { color: var(--text); }
+
+    .hero { text-align: center; padding: 64px 0 36px; }
+    .hero img.logo { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 18px 50px rgba(59,130,246,.35); }
+    .hero h1 { font-size: 54px; letter-spacing: -1.5px; margin: 24px 0 10px; }
+    .hero p.tagline { font-size: 20px; color: var(--muted); max-width: 640px; margin: 0 auto 32px; }
+
+    .cmd {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; max-width: 660px; margin: 0 auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14.5px;
+      text-align: left;
+    }
+    .cmd code { color: #cdd7ee; overflow-x: auto; white-space: nowrap; flex: 1; }
+    .cmd .dollar { color: var(--accent); user-select: none; }
+    .copy-btn {
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--accent-2); }
+    .sub { color: var(--muted); font-size: 14px; margin-top: 16px; }
+    .sub a { color: var(--text); border-bottom: 1px solid var(--border); }
+
+    .shot { margin: 56px auto 0; max-width: 920px; }
+    .shot img {
+      width: 100%; border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    }
+
+    section { padding: 72px 0; }
+    h2 { font-size: 30px; letter-spacing: -.5px; text-align: center; margin-bottom: 40px; }
+
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px;
+    }
+    .feature .ico { font-size: 22px; }
+    .feature h3 { font-size: 16px; margin: 12px 0 6px; }
+    .feature p { color: var(--muted); font-size: 14.5px; }
+
+    .steps { max-width: 720px; margin: 0 auto; display: grid; gap: 14px; }
+    .step { display: flex; gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .step .n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+    .step p { color: var(--muted); font-size: 15px; }
+    .step b { color: var(--text); }
+
+    .note { max-width: 720px; margin: 28px auto 0; color: var(--muted); font-size: 13.5px; text-align: center; }
+    code.inline { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; font-family: ui-monospace, monospace; font-size: 13px; color: #cdd7ee; }
+
+    footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--muted); font-size: 14px; text-align: center; }
+
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 40px; }
+      .features { grid-template-columns: 1fr; }
+      .cmd code { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="brand"><img src="icon.png" alt="" /> Tunnelbar</div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/ayush-sharaf/tunnelbar">GitHub</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <img class="logo" src="icon.png" alt="Tunnelbar icon" />
+      <h1>Tunnelbar</h1>
+      <p class="tagline">Manage your cloudflared tunnels — and any local service — from the macOS menu bar. No terminal juggling.</p>
+
+      <div class="cmd">
+        <span class="dollar">$</span>
+        <code id="install-cmd">curl -fsSL https://tunnelbar.vercel.app/install.sh | bash</code>
+        <button class="copy-btn" onclick="copyCmd()">Copy</button>
+      </div>
+      <p class="sub">
+        One command — installs to Applications and opens. macOS 14+ (Apple Silicon).
+        &nbsp;·&nbsp; <a id="dmg-link" href="https://github.com/ayush-sharaf/tunnelbar/releases/latest">Download the DMG instead</a>
+      </p>
+    </header>
+
+    <div class="shot"><img src="screenshot.png" alt="Tunnelbar manager window" /></div>
+
+    <section id="features">
+      <h2>Everything in the menu bar</h2>
+      <div class="features">
+        <div class="feature"><div class="ico">🟢</div><h3>Live status &amp; control</h3><p>Start, stop, restart, and watch every connection's status from the menu bar.</p></div>
+        <div class="feature"><div class="ico">⌨️</div><h3>Any command</h3><p>Paste a cloudflared command, <code class="inline">npm start</code>, ngrok — anything. Optional working directory.</p></div>
+        <div class="feature"><div class="ico">📜</div><h3>Live logs</h3><p>Streaming per-connection logs. ⌘-click URLs and file paths to open them, like Terminal.</p></div>
+        <div class="feature"><div class="ico">🔁</div><h3>Auto-reconnect</h3><p>Optionally restart a connection that drops — but never one you stopped yourself.</p></div>
+        <div class="feature"><div class="ico">↕️</div><h3>Reorder &amp; manage</h3><p>Drag to reorder, delete inline, and back up or import your connections as JSON.</p></div>
+        <div class="feature"><div class="ico">🎨</div><h3>Themes &amp; updates</h3><p>Light / dark / system theme, open-at-login, and a built-in check for updates.</p></div>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>Install in seconds</h2>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><p><b>Run the command</b> above in Terminal. It downloads the latest release and installs <code class="inline">Tunnelbar.app</code> into Applications.</p></div>
+        <div class="step"><div class="n">2</div><p><b>It opens automatically</b> — the menu-bar icon appears at the top-right. No Gatekeeper prompt: the installer clears the download flag for you.</p></div>
+        <div class="step"><div class="n">3</div><p><b>Add a connection</b> and start it. If a command needs a tool you don't have (e.g. cloudflared), Tunnelbar tells you which one to install.</p></div>
+      </div>
+      <p class="note">
+        Tunnelbar is open-source and <b>not notarized by Apple</b> (no paid developer account), so the installer removes the
+        <code class="inline">com.apple.quarantine</code> flag on your behalf. Prefer to review first? Read
+        <a href="https://github.com/ayush-sharaf/tunnelbar/blob/main/website/install.sh">install.sh</a> and the
+        <a href="https://github.com/ayush-sharaf/tunnelbar">source</a>.
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      Tunnelbar · MIT licensed · <a href="https://github.com/ayush-sharaf/tunnelbar">github.com/ayush-sharaf/tunnelbar</a>
+    </div>
+  </footer>
+
+  <script>
+    // Always show the install command for wherever this page is hosted.
+    (function () {
+      var origin = location.origin && location.origin.startsWith("http") ? location.origin : "https://tunnelbar.vercel.app";
+      document.getElementById("install-cmd").textContent = "curl -fsSL " + origin + "/install.sh | bash";
+    })();
+    function copyCmd() {
+      var text = document.getElementById("install-cmd").textContent;
+      navigator.clipboard.writeText(text).then(function () {
+        var b = document.querySelector(".copy-btn");
+        var old = b.textContent; b.textContent = "Copied!";
+        setTimeout(function () { b.textContent = old; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>
