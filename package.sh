@@ -1,6 +1,5 @@
 #!/bin/bash
-# Build TunnelManager.app and package it into a distributable DMG (and zip)
-# for sharing with teammates.
+# Build Tunnelbar.app and package it into a distributable DMG (and zip).
 #
 # The app is only ad-hoc signed (no Apple Developer account), so when a
 # teammate downloads it macOS Gatekeeper will quarantine it. See INSTALL.md /
@@ -9,9 +8,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-APP_NAME="TunnelManager"
+APP_NAME="Tunnelbar"
 BUNDLE="${APP_NAME}.app"
-VOL_NAME="Tunnel Manager"
+VOL_NAME="Tunnelbar"
 DIST="dist"
 
 # Pull the version from Info.plist for nicely named artifacts.

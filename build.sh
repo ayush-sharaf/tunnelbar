@@ -1,12 +1,12 @@
 #!/bin/bash
-# Build TunnelManager.app from the Swift sources.
+# Build Tunnelbar.app from the Swift sources.
 # Uses swiftc directly because SwiftPM's manifest API is broken in bare
 # Command Line Tools installs (no full Xcode).
 set -euo pipefail
 
 cd "$(dirname "$0")"
 
-APP_NAME="TunnelManager"
+APP_NAME="Tunnelbar"
 BUNDLE="${APP_NAME}.app"
 TARGET="arm64-apple-macosx14.0"
 
@@ -15,7 +15,7 @@ mkdir -p build
 swiftc -O \
   -target "${TARGET}" \
   -framework AppKit -framework SwiftUI -framework Combine \
-  Sources/TunnelManager/*.swift \
+  Sources/Tunnelbar/*.swift \
   -o "build/${APP_NAME}"
 
 echo "==> Assembling ${BUNDLE}…"

@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>TunnelManager</string>
+    <string>Tunnelbar</string>
     <key>CFBundleDisplayName</key>
-    <string>Tunnel Manager</string>
+    <string>Tunnelbar</string>
     <key>CFBundleIdentifier</key>
-    <string>com.softwareartistry.tunnelmanager</string>
+    <string>io.github.ayush-sharaf.tunnelbar</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>CFBundleShortVersionString</key>
@@ -15,7 +15,7 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleExecutable</key>
-    <string>TunnelManager</string>
+    <string>Tunnelbar</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <!-- Menu-bar (agent) app: no Dock icon by default. -->

@@ -15,7 +15,7 @@ final class TunnelStore: ObservableObject {
     private init() {
         let fm = FileManager.default
         let base = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        supportDir = base.appendingPathComponent("TunnelManager", isDirectory: true)
+        supportDir = base.appendingPathComponent("Tunnelbar", isDirectory: true)
         logsDir = supportDir.appendingPathComponent("logs", isDirectory: true)
         configURL = supportDir.appendingPathComponent("connections.json")
         try? fm.createDirectory(at: logsDir, withIntermediateDirectories: true)
@@ -33,8 +33,11 @@ final class TunnelStore: ObservableObject {
 
     func update(_ config: ConnectionConfig) {
         guard let tunnel = tunnels.first(where: { $0.id == config.id }) else { return }
+        let wasRunning = tunnel.status.isRunning
         tunnel.config = config
         save()
+        // Apply the edited command immediately by restarting a live connection.
+        if wasRunning { tunnel.restart() }
     }
 
     func remove(_ tunnel: Tunnel) {
@@ -75,7 +78,7 @@ final class TunnelStore: ObservableObject {
             let data = try encoder.encode(configs)
             try data.write(to: configURL, options: .atomic)
         } catch {
-            NSLog("TunnelManager: failed to save connections: \(error)")
+            NSLog("Tunnelbar: failed to save connections: \(error)")
         }
     }
 

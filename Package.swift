@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "TunnelManager",
+    name: "Tunnelbar",
     platforms: [
         .macOS(.v14)
     ],
     targets: [
         .executableTarget(
-            name: "TunnelManager",
-            path: "Sources/TunnelManager"
+            name: "Tunnelbar",
+            path: "Sources/Tunnelbar"
         )
     ]
 )

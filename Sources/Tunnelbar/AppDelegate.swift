@@ -20,7 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "point.3.connected.trianglepath.dotted",
-                                   accessibilityDescription: "Tunnel Manager")
+                                   accessibilityDescription: "Tunnelbar")
             button.image?.isTemplate = true
         }
 
@@ -33,10 +33,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             DispatchQueue.main.async { self?.updateStatusButton() }
         }
         updateStatusButton()
+
+        // Show the manager window on launch so opening the app from Spotlight /
+        // Finder / Dock reveals the UI (not just the status-bar icon).
+        openManager()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         store.stopAll()
+    }
+
+    /// Called when the app is re-activated while already running (e.g. opened
+    /// again from Spotlight, Finder, or the Dock). Re-show the manager window.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        openManager()
+        return true
     }
 
     /// Build the application main menu. Without this, standard keyboard
@@ -51,7 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let appMenu = NSMenu()
         appMenu.addItem(withTitle: "Hide", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(.separator())
-        let quitItem = appMenu.addItem(withTitle: "Quit Tunnel Manager",
+        let quitItem = appMenu.addItem(withTitle: "Quit Tunnelbar",
                                        action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
         appItem.submenu = appMenu
@@ -83,7 +94,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
 
-        let header = NSMenuItem(title: "Tunnel Manager", action: nil, keyEquivalent: "")
+        let header = NSMenuItem(title: "Tunnelbar", action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(header)
         menu.addItem(.separator())
@@ -109,7 +120,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         addItem(to: menu, title: "Open Manager…", key: "o", action: #selector(openManager))
         addItem(to: menu, title: "Add Connection…", key: "n", action: #selector(addConnection))
         menu.addItem(.separator())
-        addItem(to: menu, title: "Quit Tunnel Manager", key: "q", action: #selector(quit))
+        addItem(to: menu, title: "Quit Tunnelbar", key: "q", action: #selector(quit))
     }
 
     private func submenu(for tunnel: Tunnel) -> NSMenu {
@@ -178,7 +189,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let root = ManagerRoot(store: store, selection: selection)
             let hosting = NSHostingController(rootView: root)
             let window = NSWindow(contentViewController: hosting)
-            window.title = "Tunnel Manager"
+            window.title = "Tunnelbar"
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             window.setContentSize(NSSize(width: 860, height: 520))
             window.center()
