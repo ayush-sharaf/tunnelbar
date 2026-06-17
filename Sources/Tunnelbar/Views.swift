@@ -12,14 +12,14 @@ struct ManagerView: View {
     var body: some View {
         NavigationSplitView {
             VStack(spacing: 0) {
-                List {
+                List(selection: $selection) {
                     ForEach(store.tunnels) { tunnel in
                         TunnelRow(tunnel: tunnel,
                                   isSelected: selection == tunnel.id) { store.remove(tunnel) }
+                            .tag(tunnel.id)
                             .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-                            .contentShape(Rectangle())
-                            .onTapGesture { selection = tunnel.id }
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
                             .contextMenu {
                                 Button("Edit…") { editing = tunnel.config }
                                 Button("Delete", role: .destructive) { store.remove(tunnel) }
@@ -137,6 +137,9 @@ struct TunnelRow: View {
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(rowBackground)
         )
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .contentShape(Rectangle())
         .onHover { hovering = $0 }
     }
 
