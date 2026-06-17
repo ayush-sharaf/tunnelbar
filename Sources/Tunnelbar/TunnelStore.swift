@@ -53,6 +53,30 @@ final class TunnelStore: ObservableObject {
         save()
     }
 
+    // MARK: - Export / Import
+
+    /// Encode all connection configs as pretty JSON for backup/sharing.
+    func exportData() -> Data? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try? encoder.encode(tunnels.map { $0.config })
+    }
+
+    /// Import connections from exported JSON, appending them with fresh ids so
+    /// they never clobber existing entries. Returns the number imported.
+    @discardableResult
+    func importConnections(from data: Data) -> Int {
+        guard let configs = try? JSONDecoder().decode([ConnectionConfig].self, from: data) else {
+            return 0
+        }
+        for var cfg in configs {
+            cfg.id = UUID()
+            tunnels.append(makeTunnel(cfg))
+        }
+        if !configs.isEmpty { save() }
+        return configs.count
+    }
+
     func tunnel(_ id: UUID) -> Tunnel? {
         tunnels.first { $0.id == id }
     }
