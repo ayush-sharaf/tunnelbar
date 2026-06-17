@@ -55,5 +55,7 @@ open Tunnelbar.app
 ## Releasing (maintainers)
 
 Run the **Release** workflow from the Actions tab (enter a version, e.g.
-`1.4`), or push a `v*` tag. CI builds the DMG/zip, publishes the GitHub
-Release, and auto-merges a PR bumping the version in `Info.plist`.
+`1.5`), or push a `v*` tag. CI builds the DMG/zip and publishes the GitHub
+Release. The version is **stamped into the app bundle at build time** — the
+source `Info.plist` keeps a `0.0.0` placeholder and is never bumped, so there's
+nothing to commit back. Local `./build.sh` produces a `0.0.0-dev` build.
