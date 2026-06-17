@@ -90,12 +90,32 @@ final class ProcessRegistry {
         return children + children.flatMap { descendants(of: $0) }
     }
 
-    /// SIGTERM a process and all of its descendants (not relying on process
+    /// Signal a process and all of its descendants (not relying on process
     /// groups, which child processes don't reliably share).
-    static func terminateTree(_ pid: Int32) {
+    static func terminateTree(_ pid: Int32, signal sig: Int32 = SIGTERM) {
         for p in ([pid] + descendants(of: pid)) where p > 0 {
-            kill(p, SIGTERM)
+            kill(p, sig)
         }
+    }
+
+    /// Terminate every recorded process tree (SIGTERM, then SIGKILL any
+    /// stragglers) and clear the registry. Used on app shutdown.
+    func terminateAll() {
+        let entries = current()
+        guard !entries.isEmpty else { write([]); return }
+        for e in entries { Self.terminateTree(e.pid) }
+        usleep(300_000) // brief grace for clean exit
+        for e in entries where Self.isAlive(e.pid) {
+            Self.terminateTree(e.pid, signal: SIGKILL)
+        }
+        write([])
+    }
+
+    /// The pid of the process LISTENing on a local TCP port, if any.
+    static func pidListening(onPort port: Int) -> Int32? {
+        guard let out = run("/usr/sbin/lsof", ["-nP", "-iTCP:\(port)", "-sTCP:LISTEN", "-t"]) else { return nil }
+        return out.split(separator: "\n").first
+            .flatMap { Int32($0.trimmingCharacters(in: .whitespaces)) }
     }
 
     private static func run(_ path: String, _ args: [String]) -> String? {

@@ -95,6 +95,17 @@ enum CommandParser {
         return nil
     }
 
+    /// Extract a local bind port from a command (e.g. `--url localhost:2346`).
+    /// Looks for localhost / 127.0.0.1 / 0.0.0.0 followed by a port.
+    static func extractPort(command: String) -> Int? {
+        let pattern = "(?:localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0):(\\d{2,5})"
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+        let range = NSRange(command.startIndex..., in: command)
+        guard let match = regex.firstMatch(in: command, range: range),
+              let portRange = Range(match.range(at: 1), in: command) else { return nil }
+        return Int(command[portRange])
+    }
+
     static func nameFromHostname(_ hostname: String) -> String {
         if hostname.contains("/"), let last = hostname.split(separator: "/").last {
             return String(last)

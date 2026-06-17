@@ -83,6 +83,19 @@ eq(TunnelStatus.running.dot, "🟢", "status: running dot")
 eq(TunnelStatus.stopped.dot, "⚪️", "status: stopped dot")
 eq(TunnelStatus.failed("x").dot, "🔴", "status: failed dot")
 
+// MARK: - CommandParser.extractPort
+
+check(CommandParser.extractPort(command: "cloudflared access tcp --hostname h/db --url localhost:2346") == 2346,
+      "extractPort: localhost")
+check(CommandParser.extractPort(command: "cloudflared access tcp --url 127.0.0.1:6379") == 6379,
+      "extractPort: 127.0.0.1")
+check(CommandParser.extractPort(command: "serve --url http://localhost:8080") == 8080,
+      "extractPort: with scheme")
+check(CommandParser.extractPort(command: "cd web-app && npm run dev") == nil,
+      "extractPort: none -> nil")
+check(CommandParser.extractPort(command: "echo localhost") == nil,
+      "extractPort: host without port -> nil")
+
 // MARK: - CommandParser.parseMissingCommand
 
 eq(CommandParser.parseMissingCommand("zsh:1: command not found: cloudflared"),

@@ -65,6 +65,23 @@ final class Tunnel: ObservableObject, Identifiable {
         setStatus(.starting)
         appendSystem("$ \(command)")
 
+        // If this command binds a local port that's already taken, reclaim our
+        // own leftover on it, or refuse with a clear message (rather than the
+        // raw "address already in use" failure).
+        if let port = CommandParser.extractPort(command: command),
+           let holder = ProcessRegistry.pidListening(onPort: port) {
+            let holderCmd = ProcessRegistry.psCommand(holder) ?? ""
+            if holderCmd.contains(command) {
+                appendSystem("Port \(port) is held by a previous instance (pid \(holder)); reclaiming it…")
+                ProcessRegistry.terminateTree(holder)
+                usleep(400_000)
+            } else {
+                appendSystem("Port \(port) is already in use by another process (pid \(holder)). Stop it or use a different port.")
+                setStatus(.failed("port \(port) in use"))
+                return
+            }
+        }
+
         let proc = Process()
         // Run through a login shell so the user's PATH (homebrew, nvm, etc.)
         // is available — this lets cloudflared, npm, etc. resolve.
