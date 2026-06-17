@@ -37,38 +37,52 @@ terminal windows.
 
 ## Install
 
-### Download a build
-Grab the latest `Tunnelbar-x.y.dmg` from the
-[Releases](https://github.com/ayush-sharaf/tunnel-management/releases) page,
-open it, and drag **Tunnelbar** into **Applications**. Because the app isn't
-notarized by Apple, clear the download quarantine once:
+**Requirements:** macOS 14+ (Apple Silicon). Tunnelbar isn't notarized by Apple
+(it's a free, open-source app), so each method below clears the Gatekeeper
+quarantine for you. Full walkthrough, updating, and uninstall steps:
+**[INSTALL.md](INSTALL.md)**.
+
+### 1. One-line install (recommended)
+
+```sh
+curl -fsSL https://tunnelbar.vercel.app/install.sh | bash
+```
+
+Downloads the latest release, installs **Tunnelbar.app** to `/Applications`,
+removes the quarantine flag, and launches it — no prompts. (Prefer not to pipe
+to bash? Review [`website/install.sh`](website/install.sh) first.)
+
+### 2. Download the DMG
+
+Grab `Tunnelbar-x.y.dmg` from
+[Releases](https://github.com/ayush-sharaf/tunnelbar/releases/latest), drag
+**Tunnelbar** into **Applications**, then clear the quarantine flag once:
 
 ```sh
 xattr -dr com.apple.quarantine /Applications/Tunnelbar.app
 ```
 
-See [INSTALL.md](INSTALL.md) for the full walkthrough.
+### 3. Build from source
 
-### Build from source
-Requires the Swift toolchain (Xcode **or** the Command Line Tools) and
-`cloudflared` on your `PATH` if you use cloudflared connections.
+Requires the Swift toolchain (Xcode **or** the Command Line Tools). Locally
+built apps aren't quarantined.
 
 ```sh
-git clone https://github.com/ayush-sharaf/tunnel-management.git
-cd tunnel-management
+git clone https://github.com/ayush-sharaf/tunnelbar.git
+cd tunnelbar
 ./build.sh          # compiles and produces Tunnelbar.app
 open Tunnelbar.app
+./package.sh        # optional: DMG + zip in dist/
 ```
 
-To produce shareable artifacts (DMG + zip in `dist/`):
+> The build uses `swiftc` directly (see `build.sh`) rather than `swift build`,
+> because SwiftPM's manifest API is broken in bare Command Line Tools installs.
+> With full Xcode, `swift build` also works.
 
-```sh
-./package.sh
-```
+### Updating
 
-> Note: the build uses `swiftc` directly (see `build.sh`) rather than
-> `swift build`, because SwiftPM's manifest API is broken in bare Command Line
-> Tools installs without full Xcode. With full Xcode, `swift build` also works.
+Re-run the one-line installer (it always fetches the latest), or download the
+newer DMG. **Settings → Check for Updates** flags new versions in-app.
 
 ## Usage
 
