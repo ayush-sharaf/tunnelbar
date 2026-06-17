@@ -7,6 +7,7 @@ terminal windows.
 > Add a connection by pasting a command, start/stop it from the menu bar, and
 > watch its live logs. Built in Swift, no Electron, ~1 MB.
 
+[![CI](https://github.com/ayush-sharaf/tunnelbar/actions/workflows/ci.yml/badge.svg)](https://github.com/ayush-sharaf/tunnelbar/actions/workflows/ci.yml)
 ![status: menu-bar app](https://img.shields.io/badge/platform-macOS%2014%2B-blue)
 ![language: Swift](https://img.shields.io/badge/Swift-6-orange)
 ![license: MIT](https://img.shields.io/badge/license-MIT-green)
@@ -95,8 +96,10 @@ To produce shareable artifacts (DMG + zip in `dist/`):
 
 ## Contributing
 
-Issues and PRs welcome. Keep changes focused and match the surrounding code
-style. There are no external dependencies — just Swift + AppKit/SwiftUI.
+Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Keep changes
+focused and match the surrounding code style. There are no external
+dependencies — just Swift + AppKit/SwiftUI. `main` is protected; CI
+(`build-and-test`) must pass before merging.
 
 ## License
 
