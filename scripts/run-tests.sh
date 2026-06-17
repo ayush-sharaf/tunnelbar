@@ -10,6 +10,7 @@ echo "==> Compiling tests…"
 swiftc -o build/run-tests \
   Sources/Tunnelbar/CommandParser.swift \
   Sources/Tunnelbar/Models.swift \
+  Sources/Tunnelbar/UpdateChecker.swift \
   Tests/main.swift
 
 echo "==> Running tests…"
