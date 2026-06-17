@@ -91,6 +91,14 @@
     .note { max-width: 720px; margin: 28px auto 0; color: var(--muted); font-size: 13.5px; text-align: center; }
     code.inline { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; font-family: ui-monospace, monospace; font-size: 13px; color: #cdd7ee; }
 
+    .alt { max-width: 720px; margin: 30px auto 0; }
+    .alt h3 { font-size: 15px; margin-bottom: 12px; text-align: center; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .alt ul { list-style: none; display: grid; gap: 10px; }
+    .alt li { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 13px 16px; font-size: 14px; color: var(--muted); }
+    .alt li b { color: var(--text); }
+    .alt code { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; font-family: ui-monospace, monospace; font-size: 12.5px; color: #cdd7ee; word-break: break-all; }
+    .alt .more { text-align: center; color: var(--muted); font-size: 13.5px; margin-top: 16px; }
+
     footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--muted); font-size: 14px; text-align: center; }
 
     @media (max-width: 720px) {
@@ -154,6 +162,25 @@
         <a href="https://github.com/ayush-sharaf/tunnelbar/blob/main/website/install.sh">install.sh</a> and the
         <a href="https://github.com/ayush-sharaf/tunnelbar">source</a>.
       </p>
+
+      <div class="alt">
+        <h3>Other ways to install</h3>
+        <ul>
+          <li><b>Download the DMG</b> — grab it from
+            <a href="https://github.com/ayush-sharaf/tunnelbar/releases/latest">Releases</a>,
+            drag Tunnelbar into Applications, then run once:
+            <code>xattr -dr com.apple.quarantine /Applications/Tunnelbar.app</code></li>
+          <li><b>Build from source</b> —
+            <code>git clone https://github.com/ayush-sharaf/tunnelbar.git &amp;&amp; cd tunnelbar &amp;&amp; ./build.sh</code>
+            (needs the Xcode Command Line Tools; no Gatekeeper step).</li>
+        </ul>
+        <p class="more">
+          <b>Updating:</b> re-run the install command (it always pulls the latest), or use
+          <b>Settings → Check for Updates</b>. &nbsp;·&nbsp;
+          Full guide, updating &amp; uninstall:
+          <a href="https://github.com/ayush-sharaf/tunnelbar/blob/main/INSTALL.md">INSTALL.md</a>.
+        </p>
+      </div>
     </section>
   </div>
 

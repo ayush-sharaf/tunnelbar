@@ -1,55 +1,120 @@
 # Installing Tunnelbar
 
-Tunnelbar is **not signed by Apple** (no paid Apple Developer account), so
-macOS Gatekeeper needs a one-time nudge to trust it. This is normal for
-open-source / in-house apps. Total time: ~30 seconds.
+Tunnelbar is a native macOS menu-bar app. It is **open-source and not notarized
+by Apple** (no paid developer account), so a downloaded copy carries macOS's
+"quarantine" flag and Gatekeeper would normally block it. Every install method
+below handles that for you — pick one.
 
-## Steps
+- **Requirements:** macOS 14 (Sonoma) or later, Apple Silicon.
+- Tunnelbar runs whatever commands you give it, so the CLI tools those commands
+  use (e.g. `cloudflared`, `node`/`npm`, `ngrok`) must be installed and on your
+  `PATH`. If one isn't, Tunnelbar tells you which tool to install.
 
-1. **Open the DMG** (`Tunnelbar-1.0.dmg`), then drag **Tunnelbar** onto the
-   **Applications** shortcut.
-   *(If you got a `.zip` instead, double-click it and move `Tunnelbar.app` into
-   your `Applications` folder.)*
+---
 
-2. **Clear the quarantine flag.** Open **Terminal** (⌘-Space → "Terminal") and
-   paste this exact line, then press Return:
+## Option 1 — One-line install (recommended)
 
+Paste this into **Terminal** and press Return:
+
+```sh
+curl -fsSL https://tunnelbar.vercel.app/install.sh | bash
+```
+
+It downloads the latest release, installs **Tunnelbar.app** into
+`/Applications`, removes the Gatekeeper quarantine flag, and launches it — no
+prompts. The menu-bar icon (⫶ connected dots) appears at the top-right.
+
+> Don't want to pipe to `bash`? The same script lives in the repo — read it
+> first, then run it:
+> ```sh
+> curl -fsSL https://raw.githubusercontent.com/ayush-sharaf/tunnelbar/main/website/install.sh -o install.sh
+> less install.sh        # review
+> bash install.sh
+> ```
+
+---
+
+## Option 2 — Download the DMG manually
+
+1. Open the [latest release](https://github.com/ayush-sharaf/tunnelbar/releases/latest)
+   and download **`Tunnelbar-x.y.dmg`**.
+2. Open the DMG and drag **Tunnelbar** onto the **Applications** shortcut.
+3. Clear the quarantine flag once (required — the app isn't notarized):
    ```sh
    xattr -dr com.apple.quarantine /Applications/Tunnelbar.app
    ```
+   > On macOS 15+ the old "right-click → Open" bypass no longer works, so this
+   > command is the reliable way. It only removes the download marker.
+4. Open **Tunnelbar** from Applications.
 
-   > On macOS 15+ (Sequoia/Tahoe) the old "right-click → Open" trick no longer
-   > works, so this command is the reliable way. It only removes the
-   > download-quarantine marker — it doesn't change anything else.
+---
 
-3. **Launch it.** Double-click **Tunnelbar** in Applications. The manager window
-   opens, and a small menu-bar icon (⫶ connected dots) appears in the top-right
-   of your screen. There is no Dock icon by default.
+## Option 3 — Build from source
 
-4. *(Optional)* **Launch at login:** System Settings → General → **Login
-   Items** → **＋** → add Tunnelbar.
+Requires the Swift toolchain (**Xcode** or the **Command Line Tools**:
+`xcode-select --install`). Locally built apps aren't quarantined, so there's no
+Gatekeeper step.
 
-## Requirements
+```sh
+git clone https://github.com/ayush-sharaf/tunnelbar.git
+cd tunnelbar
+./build.sh          # produces Tunnelbar.app
+open Tunnelbar.app
+```
 
-- macOS 14 or later (Apple Silicon).
-- Whatever CLI tools your commands use must be installed and on your `PATH`
-  (e.g. `cloudflared`, `node`/`npm`). Commands run through your login shell, so
-  Homebrew tools are picked up automatically.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev workflow.
 
-## Using it
+---
 
-- Click the menu-bar icon → **Add Connection…** (or just open the app).
-- Paste a command, e.g.
-  `cloudflared access tcp --hostname tunnel-int.example.com/postgres --url localhost:2346`
-  or `cd my-app && npm start`. Optionally set a working directory.
-- Start/stop each connection from the menu-bar submenu or the manager window.
-- Open **Show Logs…** to watch live output; **⌘-click** URLs or file paths in
-  the logs to open them.
+## First run
+
+1. Click the menu-bar icon → **Add Connection…** (or open the app for the
+   manager window).
+2. Paste a command, e.g.
+   `cloudflared access tcp --hostname tunnel.example.com/postgres --url localhost:5432`
+   or `cd my-app && npm run dev`. Optionally set a working directory.
+3. Start it from the menu-bar submenu or the manager window. **Show Logs…**
+   streams output; ⌘-click URLs/paths to open them.
+4. *(Optional)* Settings → **Open Tunnelbar at login** to launch automatically.
+
+---
+
+## Updating
+
+- **Installed via Option 1:** re-run the same `curl … | bash` command — it always
+  fetches the latest release.
+- **Installed via DMG:** download the newer DMG and repeat Option 2.
+- Either way, **Settings → Check for Updates** (or "Check on launch") tells you
+  when a new version is out.
+
+Your connections and settings are preserved across updates. You can also back
+them up from **Settings → Connections → Export**.
+
+---
+
+## Uninstalling
+
+```sh
+# Quit Tunnelbar first (menu-bar icon → Quit), then:
+rm -rf "/Applications/Tunnelbar.app"
+rm -rf "$HOME/Library/Application Support/Tunnelbar"   # connections + logs
+defaults delete io.github.ayush-sharaf.tunnelbar 2>/dev/null || true
+```
+
+---
 
 ## Troubleshooting
 
-- **"Tunnelbar is damaged and can't be opened"** — you skipped step 2. Run the
-  `xattr` command above.
-- **Nothing appears** — check the menu bar (it's a menu-bar app). To see launch
-  output, run it from Terminal:
-  `/Applications/Tunnelbar.app/Contents/MacOS/Tunnelbar`.
+- **"Tunnelbar is damaged and can't be opened"** — the quarantine flag is still
+  set (only happens with a manual DMG install where step 3 was skipped). Run:
+  `xattr -dr com.apple.quarantine /Applications/Tunnelbar.app`
+- **Nothing opens / no window** — it's a menu-bar app; look at the top-right of
+  the screen for the icon. Opening it from Spotlight/Finder shows the window.
+- **A connection fails with "'X' not found"** — the command needs a tool that
+  isn't installed or isn't on your `PATH`. Install it (e.g. `brew install X`)
+  and start the connection again.
+- **"port N in use"** — another process is already bound to that port.
+  Tunnelbar reclaims its own leftovers automatically; if it's a different
+  process, stop it or change the port.
+- **See launch output** — run the binary directly:
+  `/Applications/Tunnelbar.app/Contents/MacOS/Tunnelbar`
