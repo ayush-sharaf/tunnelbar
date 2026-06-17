@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var settingsWindow: NSWindow?
     private var selection = Selection()
     private var cancellable: AnyCancellable?
+    private var signalSources: [DispatchSourceSignal] = []
 
     /// Box so SwiftUI and AppKit share the selected tunnel id.
     final class Selection: ObservableObject {
@@ -30,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
         AppSettings.shared.applyTheme()
+        installSignalHandlers()
         setupMainMenu()
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -71,7 +73,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        store.stopAll()
+        store.shutdown()
+    }
+
+    /// Catch termination signals (e.g. `pkill`, logout) so child processes are
+    /// cleaned up even when the normal quit path doesn't run. SIGKILL can't be
+    /// caught — those orphans are reaped on the next launch instead.
+    private func installSignalHandlers() {
+        for sig in [SIGINT, SIGTERM, SIGHUP] {
+            signal(sig, SIG_IGN)
+            let source = DispatchSource.makeSignalSource(signal: sig, queue: .main)
+            source.setEventHandler { [weak self] in
+                self?.store.shutdown()
+                exit(0)
+            }
+            source.resume()
+            signalSources.append(source)
+        }
     }
 
     /// Called when the app is re-activated while already running (e.g. opened
@@ -314,7 +332,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func quit() {
-        store.stopAll()
+        store.shutdown()
         NSApp.terminate(nil)
     }
 }

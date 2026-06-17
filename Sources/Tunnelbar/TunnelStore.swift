@@ -93,6 +93,14 @@ final class TunnelStore: ObservableObject {
         tunnels.forEach { $0.stop() }
     }
 
+    /// Stop everything and guarantee no child processes survive the app:
+    /// stop each connection, then SIGTERM/SIGKILL any recorded process trees
+    /// and clear the registry. Called on quit and on termination signals.
+    func shutdown() {
+        tunnels.forEach { $0.stop() }
+        registry.terminateAll()
+    }
+
     // MARK: - Persistence
 
     private func makeTunnel(_ config: ConnectionConfig) -> Tunnel {
