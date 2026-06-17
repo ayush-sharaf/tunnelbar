@@ -13,13 +13,14 @@ BUNDLE="${APP_NAME}.app"
 VOL_NAME="Tunnelbar"
 DIST="dist"
 
-# Pull the version from Info.plist for nicely named artifacts.
-VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Info.plist 2>/dev/null || echo "1.0")
+# Version is stamped at build time. Releases set TUNNELBAR_VERSION; local
+# packaging defaults to a dev version.
+VERSION="${TUNNELBAR_VERSION:-0.0.0-dev}"
 DMG="${DIST}/${APP_NAME}-${VERSION}.dmg"
 ZIP="${DIST}/${APP_NAME}-${VERSION}.zip"
 
-# 1. Build the app.
-./build.sh
+# 1. Build the app (build.sh reads TUNNELBAR_VERSION to stamp the bundle).
+TUNNELBAR_VERSION="${VERSION}" ./build.sh
 
 # 2. Stage a folder with the app + an /Applications symlink for drag-install.
 echo "==> Packaging…"

@@ -9,6 +9,9 @@ cd "$(dirname "$0")"
 APP_NAME="Tunnelbar"
 BUNDLE="${APP_NAME}.app"
 TARGET="arm64-apple-macosx14.0"
+# Version is stamped at build time (the source Info.plist holds a placeholder).
+# Local builds default to a dev version; releases set TUNNELBAR_VERSION.
+VERSION="${TUNNELBAR_VERSION:-0.0.0-dev}"
 
 echo "==> Compiling ${APP_NAME}…"
 mkdir -p build
@@ -25,6 +28,11 @@ mkdir -p "${BUNDLE}/Contents/Resources"
 cp "build/${APP_NAME}" "${BUNDLE}/Contents/MacOS/${APP_NAME}"
 cp Info.plist "${BUNDLE}/Contents/Info.plist"
 printf 'APPL????' > "${BUNDLE}/Contents/PkgInfo"
+
+# Stamp the version into the bundle's Info.plist (not the source).
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${BUNDLE}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${VERSION}" "${BUNDLE}/Contents/Info.plist"
+echo "==> Stamped version ${VERSION}"
 
 # App icon (generate once with: swift scripts/generate-icon.swift)
 if [ -f Resources/AppIcon.icns ]; then
