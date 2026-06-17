@@ -12,10 +12,14 @@ struct ManagerView: View {
     var body: some View {
         NavigationSplitView {
             VStack(spacing: 0) {
-                List(selection: $selection) {
+                List {
                     ForEach(store.tunnels) { tunnel in
-                        TunnelRow(tunnel: tunnel) { store.remove(tunnel) }
-                            .tag(tunnel.id)
+                        TunnelRow(tunnel: tunnel,
+                                  isSelected: selection == tunnel.id) { store.remove(tunnel) }
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                            .contentShape(Rectangle())
+                            .onTapGesture { selection = tunnel.id }
                             .contextMenu {
                                 Button("Edit…") { editing = tunnel.config }
                                 Button("Delete", role: .destructive) { store.remove(tunnel) }
@@ -23,6 +27,7 @@ struct ManagerView: View {
                     }
                     .onMove { store.move(from: $0, to: $1) }
                 }
+                .listStyle(.plain)
                 .overlay {
                     if store.tunnels.isEmpty {
                         ContentUnavailableView(
@@ -93,6 +98,7 @@ struct ManagerView: View {
 
 struct TunnelRow: View {
     @ObservedObject var tunnel: Tunnel
+    var isSelected: Bool
     var onDelete: () -> Void
     @State private var hovering = false
 
@@ -111,7 +117,7 @@ struct TunnelRow: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
-            Spacer()
+            Spacer(minLength: 4)
             Button(role: .destructive) {
                 onDelete()
             } label: {
@@ -122,8 +128,27 @@ struct TunnelRow: View {
             .help("Delete connection")
             .opacity(hovering ? 1 : 0.55)
         }
-        .padding(.vertical, 2)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // Solid background so the whole row (not just the text) is the drag
+        // image while reordering, and so selection/hover are clearly visible.
+        .background(
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(rowBackground)
+        )
         .onHover { hovering = $0 }
+    }
+
+    private var rowBackground: Color {
+        let base = NSColor.controlBackgroundColor
+        if isSelected {
+            return Color(nsColor: NSColor.controlAccentColor.blended(withFraction: 0.7, of: base) ?? base)
+        }
+        if hovering {
+            return Color(nsColor: NSColor.controlColor.blended(withFraction: 0.5, of: base) ?? base)
+        }
+        return Color(nsColor: base)
     }
 
     private var color: Color {
