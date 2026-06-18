@@ -19,8 +19,8 @@ struct SettingsView: View {
             }
 
             Section("General") {
-                Toggle("Open Tunnelbar at login", isOn: $settings.launchAtLogin)
-                Text("When enabled, Tunnelbar starts automatically (in the menu bar) when you log in.")
+                Toggle("Open Tunnelnest at login", isOn: $settings.launchAtLogin)
+                Text("When enabled, Tunnelnest starts automatically (in the menu bar) when you log in.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -50,12 +50,12 @@ struct SettingsView: View {
             }
 
             Section("About") {
-                LabeledContent("Application", value: "Tunnelbar")
+                LabeledContent("Application", value: "Tunnelnest")
                 LabeledContent("Version", value: "\(settings.version) (\(settings.build))")
                 Link("GitHub Repository",
-                     destination: URL(string: "https://github.com/ayush-sharaf/tunnelbar")!)
+                     destination: URL(string: "https://github.com/ayush-sharaf/tunnelnest")!)
                 Link("Report an Issue",
-                     destination: URL(string: "https://github.com/ayush-sharaf/tunnelbar/issues")!)
+                     destination: URL(string: "https://github.com/ayush-sharaf/tunnelnest/issues")!)
             }
         }
         .formStyle(.grouped)
@@ -68,7 +68,7 @@ struct SettingsView: View {
             return
         }
         let panel = NSSavePanel()
-        panel.nameFieldStringValue = "tunnelbar-connections.json"
+        panel.nameFieldStringValue = "tunnelnest-connections.json"
         panel.allowedContentTypes = [.json]
         if panel.runModal() == .OK, let url = panel.url {
             do {

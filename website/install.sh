@@ -1,24 +1,24 @@
 #!/bin/bash
-# Tunnelbar installer.
+# Tunnelnest installer.
 #   curl -fsSL https://<your-domain>/install.sh | bash
 #
-# Downloads the latest release DMG, installs Tunnelbar.app into /Applications,
+# Downloads the latest release DMG, installs Tunnelnest.app into /Applications,
 # removes the Gatekeeper quarantine flag (the app is not notarized), and launches
 # it. No Apple Developer account required.
 set -euo pipefail
 
-REPO="ayush-sharaf/tunnelbar"
-APP="Tunnelbar.app"
+REPO="ayush-sharaf/tunnelnest"
+APP="Tunnelnest.app"
 APPS_DIR="/Applications"
 
 bold() { printf "\033[1m%s\033[0m\n" "$1"; }
 info() { printf "  %s\n" "$1"; }
 
-bold "Installing Tunnelbar…"
+bold "Installing Tunnelnest…"
 
 # macOS only.
 if [ "$(uname -s)" != "Darwin" ]; then
-  echo "Tunnelbar is a macOS app; this installer only runs on macOS." >&2
+  echo "Tunnelnest is a macOS app; this installer only runs on macOS." >&2
   exit 1
 fi
 
@@ -38,7 +38,7 @@ fi
 # 2. Download it.
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-DMG="$TMP/Tunnelbar.dmg"
+DMG="$TMP/Tunnelnest.dmg"
 info "Downloading $(basename "$DMG_URL")…"
 curl -fsSL "$DMG_URL" -o "$DMG"
 
@@ -61,5 +61,5 @@ xattr -dr com.apple.quarantine "$APPS_DIR/$APP" 2>/dev/null || true
 # 5. Launch.
 open "$APPS_DIR/$APP"
 
-bold "✅ Tunnelbar is installed in your Applications folder and running in the menu bar."
+bold "✅ Tunnelnest is installed in your Applications folder and running in the menu bar."
 info "Look for the menu-bar icon (top-right). Add a connection to get started."

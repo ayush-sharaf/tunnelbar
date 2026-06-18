@@ -23,5 +23,5 @@ Relevant lines from the connection's log view (redact secrets).
 
 **Environment**
 - macOS version:
-- Tunnelbar version (Settings → About):
+- Tunnelnest version (Settings → About):
 - `cloudflared` version (if used):

@@ -13,7 +13,7 @@ let root = fm.currentDirectoryPath
 let resourcesDir = "\(root)/Resources"
 try? fm.createDirectory(atPath: resourcesDir, withIntermediateDirectories: true)
 
-let iconsetDir = NSTemporaryDirectory() + "Tunnelbar.iconset"
+let iconsetDir = NSTemporaryDirectory() + "Tunnelnest.iconset"
 try? fm.removeItem(atPath: iconsetDir)
 try! fm.createDirectory(atPath: iconsetDir, withIntermediateDirectories: true)
 

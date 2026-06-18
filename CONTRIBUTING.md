@@ -1,6 +1,6 @@
-# Contributing to Tunnelbar
+# Contributing to Tunnelnest
 
-Thanks for your interest! Tunnelbar is a small, dependency-free native macOS
+Thanks for your interest! Tunnelnest is a small, dependency-free native macOS
 app, so contributing is straightforward.
 
 ## Prerequisites
@@ -17,8 +17,8 @@ There are **no external dependencies** — just Swift + AppKit/SwiftUI.
 
 ```sh
 ./scripts/run-tests.sh   # compile + run the logic tests
-./build.sh               # produce Tunnelbar.app
-open Tunnelbar.app
+./build.sh               # produce Tunnelnest.app
+open Tunnelnest.app
 ```
 
 > The project builds with `swiftc` directly (see `build.sh`) rather than
@@ -29,7 +29,7 @@ open Tunnelbar.app
 
 | Path | Purpose |
 |------|---------|
-| `Sources/Tunnelbar/` | App sources (AppKit + SwiftUI) |
+| `Sources/Tunnelnest/` | App sources (AppKit + SwiftUI) |
 | `Tests/main.swift` | Pure-logic tests (run via `scripts/run-tests.sh`) |
 | `scripts/` | Icon generation, test runner, legacy-data cleanup |
 | `build.sh` / `package.sh` | Build the `.app` / package DMG + zip |
