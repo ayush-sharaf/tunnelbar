@@ -9,7 +9,7 @@ labels: enhancement
 What are you trying to do, and what's painful today?
 
 **Proposed solution**
-What you'd like Tunnelbar to do.
+What you'd like Tunnelnest to do.
 
 **Alternatives considered**
 Any workarounds or other approaches.

@@ -16,7 +16,16 @@ final class TunnelStore: ObservableObject {
     private init() {
         let fm = FileManager.default
         let base = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        supportDir = base.appendingPathComponent("Tunnelbar", isDirectory: true)
+        supportDir = base.appendingPathComponent("Tunnelnest", isDirectory: true)
+
+        // Carry over data from the app's former name ("Tunnelbar") so existing
+        // connections and logs survive the rename.
+        let legacyDir = base.appendingPathComponent("Tunnelbar", isDirectory: true)
+        if !fm.fileExists(atPath: supportDir.path),
+           fm.fileExists(atPath: legacyDir.path) {
+            try? fm.moveItem(at: legacyDir, to: supportDir)
+        }
+
         logsDir = supportDir.appendingPathComponent("logs", isDirectory: true)
         configURL = supportDir.appendingPathComponent("connections.json")
         registry = ProcessRegistry(fileURL: supportDir.appendingPathComponent("running.json"))
@@ -120,7 +129,7 @@ final class TunnelStore: ObservableObject {
             let data = try encoder.encode(configs)
             try data.write(to: configURL, options: .atomic)
         } catch {
-            NSLog("Tunnelbar: failed to save connections: \(error)")
+            NSLog("Tunnelnest: failed to save connections: \(error)")
         }
     }
 

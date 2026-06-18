@@ -45,7 +45,7 @@ final class ProcessRegistry {
             Self.terminateTree(entry.pid)
             reaped += 1
         }
-        if reaped > 0 { NSLog("Tunnelbar: reaped \(reaped) orphaned process(es) from a previous session.") }
+        if reaped > 0 { NSLog("Tunnelnest: reaped \(reaped) orphaned process(es) from a previous session.") }
         write([])
     }
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Remove data left behind by the app's former name ("TunnelManager").
-# Tunnelbar stores its data under ~/Library/Application Support/Tunnelbar;
+# Tunnelnest stores its data under ~/Library/Application Support/Tunnelnest;
 # this deletes the old ~/Library/Application Support/TunnelManager folder.
 #
 # Usage:

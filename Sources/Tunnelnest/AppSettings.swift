@@ -79,7 +79,7 @@ final class AppSettings: ObservableObject {
                 if service.status == .enabled { try service.unregister() }
             }
         } catch {
-            NSLog("Tunnelbar: failed to update login item: \(error)")
+            NSLog("Tunnelnest: failed to update login item: \(error)")
         }
     }
 }

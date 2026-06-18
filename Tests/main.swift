@@ -1,4 +1,4 @@
-// Lightweight test runner for Tunnelbar's pure-logic layer.
+// Lightweight test runner for Tunnelnest's pure-logic layer.
 //
 // The project builds with `swiftc` (SwiftPM's manifest API is broken in bare
 // Command Line Tools), so instead of an XCTest/SwiftPM target these tests are

@@ -1,14 +1,14 @@
-# Installing Tunnelbar
+# Installing Tunnelnest
 
-Tunnelbar is a native macOS menu-bar app. It is **open-source and not notarized
+Tunnelnest is a native macOS menu-bar app. It is **open-source and not notarized
 by Apple** (no paid developer account), so a downloaded copy carries macOS's
 "quarantine" flag and Gatekeeper would normally block it. Every install method
 below handles that for you — pick one.
 
 - **Requirements:** macOS 14 (Sonoma) or later, Apple Silicon.
-- Tunnelbar runs whatever commands you give it, so the CLI tools those commands
+- Tunnelnest runs whatever commands you give it, so the CLI tools those commands
   use (e.g. `cloudflared`, `node`/`npm`, `ngrok`) must be installed and on your
-  `PATH`. If one isn't, Tunnelbar tells you which tool to install.
+  `PATH`. If one isn't, Tunnelnest tells you which tool to install.
 
 ---
 
@@ -17,17 +17,17 @@ below handles that for you — pick one.
 Paste this into **Terminal** and press Return:
 
 ```sh
-curl -fsSL https://tunnelbar.vercel.app/install.sh | bash
+curl -fsSL https://tunnelnest.vercel.app/install.sh | bash
 ```
 
-It downloads the latest release, installs **Tunnelbar.app** into
+It downloads the latest release, installs **Tunnelnest.app** into
 `/Applications`, removes the Gatekeeper quarantine flag, and launches it — no
 prompts. The menu-bar icon (⫶ connected dots) appears at the top-right.
 
 > Don't want to pipe to `bash`? The same script lives in the repo — read it
 > first, then run it:
 > ```sh
-> curl -fsSL https://raw.githubusercontent.com/ayush-sharaf/tunnelbar/main/website/install.sh -o install.sh
+> curl -fsSL https://raw.githubusercontent.com/ayush-sharaf/tunnelnest/main/website/install.sh -o install.sh
 > less install.sh        # review
 > bash install.sh
 > ```
@@ -36,16 +36,16 @@ prompts. The menu-bar icon (⫶ connected dots) appears at the top-right.
 
 ## Option 2 — Download the DMG manually
 
-1. Open the [latest release](https://github.com/ayush-sharaf/tunnelbar/releases/latest)
-   and download **`Tunnelbar-x.y.dmg`**.
-2. Open the DMG and drag **Tunnelbar** onto the **Applications** shortcut.
+1. Open the [latest release](https://github.com/ayush-sharaf/tunnelnest/releases/latest)
+   and download **`Tunnelnest-x.y.dmg`**.
+2. Open the DMG and drag **Tunnelnest** onto the **Applications** shortcut.
 3. Clear the quarantine flag once (required — the app isn't notarized):
    ```sh
-   xattr -dr com.apple.quarantine /Applications/Tunnelbar.app
+   xattr -dr com.apple.quarantine /Applications/Tunnelnest.app
    ```
    > On macOS 15+ the old "right-click → Open" bypass no longer works, so this
    > command is the reliable way. It only removes the download marker.
-4. Open **Tunnelbar** from Applications.
+4. Open **Tunnelnest** from Applications.
 
 ---
 
@@ -56,10 +56,10 @@ Requires the Swift toolchain (**Xcode** or the **Command Line Tools**:
 Gatekeeper step.
 
 ```sh
-git clone https://github.com/ayush-sharaf/tunnelbar.git
-cd tunnelbar
-./build.sh          # produces Tunnelbar.app
-open Tunnelbar.app
+git clone https://github.com/ayush-sharaf/tunnelnest.git
+cd tunnelnest
+./build.sh          # produces Tunnelnest.app
+open Tunnelnest.app
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev workflow.
@@ -75,7 +75,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev workflow.
    or `cd my-app && npm run dev`. Optionally set a working directory.
 3. Start it from the menu-bar submenu or the manager window. **Show Logs…**
    streams output; ⌘-click URLs/paths to open them.
-4. *(Optional)* Settings → **Open Tunnelbar at login** to launch automatically.
+4. *(Optional)* Settings → **Open Tunnelnest at login** to launch automatically.
 
 ---
 
@@ -95,26 +95,26 @@ them up from **Settings → Connections → Export**.
 ## Uninstalling
 
 ```sh
-# Quit Tunnelbar first (menu-bar icon → Quit), then:
-rm -rf "/Applications/Tunnelbar.app"
-rm -rf "$HOME/Library/Application Support/Tunnelbar"   # connections + logs
-defaults delete io.github.ayush-sharaf.tunnelbar 2>/dev/null || true
+# Quit Tunnelnest first (menu-bar icon → Quit), then:
+rm -rf "/Applications/Tunnelnest.app"
+rm -rf "$HOME/Library/Application Support/Tunnelnest"   # connections + logs
+defaults delete io.github.ayush-sharaf.tunnelnest 2>/dev/null || true
 ```
 
 ---
 
 ## Troubleshooting
 
-- **"Tunnelbar is damaged and can't be opened"** — the quarantine flag is still
+- **"Tunnelnest is damaged and can't be opened"** — the quarantine flag is still
   set (only happens with a manual DMG install where step 3 was skipped). Run:
-  `xattr -dr com.apple.quarantine /Applications/Tunnelbar.app`
+  `xattr -dr com.apple.quarantine /Applications/Tunnelnest.app`
 - **Nothing opens / no window** — it's a menu-bar app; look at the top-right of
   the screen for the icon. Opening it from Spotlight/Finder shows the window.
 - **A connection fails with "'X' not found"** — the command needs a tool that
   isn't installed or isn't on your `PATH`. Install it (e.g. `brew install X`)
   and start the connection again.
 - **"port N in use"** — another process is already bound to that port.
-  Tunnelbar reclaims its own leftovers automatically; if it's a different
+  Tunnelnest reclaims its own leftovers automatically; if it's a different
   process, stop it or change the port.
 - **See launch output** — run the binary directly:
-  `/Applications/Tunnelbar.app/Contents/MacOS/Tunnelbar`
+  `/Applications/Tunnelnest.app/Contents/MacOS/Tunnelnest`

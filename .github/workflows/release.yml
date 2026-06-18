@@ -1,6 +1,6 @@
 name: Release
 
-# Build Tunnelbar and publish a GitHub Release either when a v* tag is pushed,
+# Build Tunnelnest and publish a GitHub Release either when a v* tag is pushed,
 # or manually from the Actions tab ("Run workflow"). The version is stamped into
 # the app bundle at build time (the source Info.plist holds a placeholder), so
 # nothing needs to be committed back to main.
@@ -45,16 +45,16 @@ jobs:
 
       - name: Build and package (DMG + zip)
         env:
-          TUNNELBAR_VERSION: ${{ steps.ver.outputs.version }}
+          TUNNELNEST_VERSION: ${{ steps.ver.outputs.version }}
         run: ./package.sh
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
-          name: Tunnelbar ${{ steps.ver.outputs.version }}
+          name: Tunnelnest ${{ steps.ver.outputs.version }}
           files: |
-            dist/Tunnelbar-*.dmg
-            dist/Tunnelbar-*.zip
+            dist/Tunnelnest-*.dmg
+            dist/Tunnelnest-*.zip
           generate_release_notes: true
           fail_on_unmatched_files: true

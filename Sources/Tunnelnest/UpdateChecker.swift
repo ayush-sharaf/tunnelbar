@@ -4,7 +4,7 @@ import Foundation
 /// signing keys — it compares the latest published release to the running
 /// bundle version and reports whether a newer one exists.
 enum UpdateChecker {
-    static let repo = "ayush-sharaf/tunnelbar"
+    static let repo = "ayush-sharaf/tunnelnest"
 
     struct Release {
         let version: String
@@ -29,7 +29,7 @@ enum UpdateChecker {
         }
         var request = URLRequest(url: url)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
-        request.setValue("Tunnelbar", forHTTPHeaderField: "User-Agent")
+        request.setValue("Tunnelnest", forHTTPHeaderField: "User-Agent")
         request.cachePolicy = .reloadIgnoringLocalCacheData
 
         URLSession.shared.dataTask(with: request) { data, _, error in

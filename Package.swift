@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "Tunnelbar",
+    name: "Tunnelnest",
     platforms: [
         .macOS(.v14)
     ],
     targets: [
         .executableTarget(
-            name: "Tunnelbar",
-            path: "Sources/Tunnelbar"
+            name: "Tunnelnest",
+            path: "Sources/Tunnelnest"
         )
     ]
 )

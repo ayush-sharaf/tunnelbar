@@ -37,7 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "point.3.connected.trianglepath.dotted",
-                                   accessibilityDescription: "Tunnelbar")
+                                   accessibilityDescription: "Tunnelnest")
             button.image?.isTemplate = true
         }
 
@@ -118,7 +118,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Hide", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(.separator())
-        let quitItem = appMenu.addItem(withTitle: "Quit Tunnelbar",
+        let quitItem = appMenu.addItem(withTitle: "Quit Tunnelnest",
                                        action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
         appItem.submenu = appMenu
@@ -150,7 +150,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
 
-        let header = NSMenuItem(title: "Tunnelbar", action: nil, keyEquivalent: "")
+        let header = NSMenuItem(title: "Tunnelnest", action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(header)
         menu.addItem(.separator())
@@ -178,7 +178,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         addItem(to: menu, title: "Settings…", key: ",", action: #selector(showSettings))
         addItem(to: menu, title: "Check for Updates…", key: "", action: #selector(checkForUpdates))
         menu.addItem(.separator())
-        addItem(to: menu, title: "Quit Tunnelbar", key: "q", action: #selector(quit))
+        addItem(to: menu, title: "Quit Tunnelnest", key: "q", action: #selector(quit))
     }
 
     private func submenu(for tunnel: Tunnel) -> NSMenu {
@@ -247,7 +247,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let root = ManagerRoot(store: store, selection: selection)
             let hosting = NSHostingController(rootView: root)
             let window = NSWindow(contentViewController: hosting)
-            window.title = "Tunnelbar"
+            window.title = "Tunnelnest"
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             window.setContentSize(NSSize(width: 860, height: 520))
             window.center()
@@ -290,7 +290,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         switch outcome {
         case .updateAvailable(let release):
             alert.messageText = "Update available"
-            alert.informativeText = "Tunnelbar \(release.version) is available. You're on \(UpdateChecker.currentVersion)."
+            alert.informativeText = "Tunnelnest \(release.version) is available. You're on \(UpdateChecker.currentVersion)."
             alert.addButton(withTitle: "Open Release")
             alert.addButton(withTitle: "Later")
             if alert.runModal() == .alertFirstButtonReturn {
@@ -299,7 +299,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .upToDate(let current):
             if silent { return }
             alert.messageText = "You're up to date"
-            alert.informativeText = "Tunnelbar \(current) is the latest version."
+            alert.informativeText = "Tunnelnest \(current) is the latest version."
             alert.addButton(withTitle: "OK")
             alert.runModal()
         case .failed(let message):
@@ -320,7 +320,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         alert.alertStyle = .warning
         alert.messageText = "“\(tool)” isn’t installed"
         alert.informativeText = """
-        Tunnelbar couldn’t find “\(tool)” on your PATH, so “\(connection)” can’t start.
+        Tunnelnest couldn’t find “\(tool)” on your PATH, so “\(connection)” can’t start.
 
         Install it (for example with Homebrew: brew install \(tool)), make sure it’s on your PATH, then start the connection again.
         """
