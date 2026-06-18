@@ -7,6 +7,9 @@ terminal windows.
 > Add a connection by pasting a command, start/stop it from the menu bar, and
 > watch its live logs. Built in Swift, no Electron, ~1 MB.
 
+**🌐 Website & install:** https://ayush-sharaf.github.io/tunnelnest/
+
+[![Website](https://img.shields.io/badge/website-tunnelnest-2b82f6)](https://ayush-sharaf.github.io/tunnelnest/)
 [![CI](https://github.com/ayush-sharaf/tunnelnest/actions/workflows/ci.yml/badge.svg)](https://github.com/ayush-sharaf/tunnelnest/actions/workflows/ci.yml)
 ![status: menu-bar app](https://img.shields.io/badge/platform-macOS%2014%2B-blue)
 ![language: Swift](https://img.shields.io/badge/Swift-6-orange)
