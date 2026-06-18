@@ -45,7 +45,7 @@ quarantine for you. Full walkthrough, updating, and uninstall steps:
 ### 1. One-line install (recommended)
 
 ```sh
-curl -fsSL https://tunnelnest.vercel.app/install.sh | bash
+curl -fsSL https://ayush-sharaf.github.io/tunnelnest/install.sh | bash
 ```
 
 Downloads the latest release, installs **Tunnelnest.app** to `/Applications`,

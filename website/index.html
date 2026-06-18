@@ -126,7 +126,7 @@
 
       <div class="cmd">
         <span class="dollar">$</span>
-        <code id="install-cmd">curl -fsSL https://tunnelnest.vercel.app/install.sh | bash</code>
+        <code id="install-cmd">curl -fsSL https://ayush-sharaf.github.io/tunnelnest/install.sh | bash</code>
         <button class="copy-btn" onclick="copyCmd()">Copy</button>
       </div>
       <p class="sub">
@@ -191,10 +191,14 @@
   </footer>
 
   <script>
-    // Always show the install command for wherever this page is hosted.
+    // Show the install command for wherever this page is hosted. Resolving
+    // "install.sh" against the current page keeps the correct path even under
+    // a GitHub Pages project subpath (…github.io/tunnelnest/).
     (function () {
-      var origin = location.origin && location.origin.startsWith("http") ? location.origin : "https://tunnelnest.vercel.app";
-      document.getElementById("install-cmd").textContent = "curl -fsSL " + origin + "/install.sh | bash";
+      try {
+        var url = new URL("install.sh", location.href).href;
+        document.getElementById("install-cmd").textContent = "curl -fsSL " + url + " | bash";
+      } catch (e) { /* keep the static default */ }
     })();
     function copyCmd() {
       var text = document.getElementById("install-cmd").textContent;

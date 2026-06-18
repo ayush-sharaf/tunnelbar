@@ -17,7 +17,7 @@ below handles that for you — pick one.
 Paste this into **Terminal** and press Return:
 
 ```sh
-curl -fsSL https://tunnelnest.vercel.app/install.sh | bash
+curl -fsSL https://ayush-sharaf.github.io/tunnelnest/install.sh | bash
 ```
 
 It downloads the latest release, installs **Tunnelnest.app** into
